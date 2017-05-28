@@ -10,6 +10,8 @@ var Minesweeper = function () {
 		var defaults = { width: 30, height: 16, numMines: null, cellSize: 30, canvas: null, spritePath: 'sprite.png' };
 
 		this.headerHeight = 100;
+
+		// sprite map as x/y coordinate pairs
 		this.sprites = {
 			unrevealed: [500, 0],
 			pressed: [450, 0],
@@ -42,6 +44,7 @@ var Minesweeper = function () {
 			buttonWon: [225, 125]
 		};
 
+		// import and check options
 		this.args = Object.assign(defaults, args);
 		if (this.args.width < 10) this.args.width = 10;
 		if (this.args.height < 10) this.args.height = 10;
@@ -56,13 +59,14 @@ var Minesweeper = function () {
 			document.body.appendChild(this.args.canvas);
 		}
 
+		// prepare canvas
 		this.ctx = this.args.canvas.getContext('2d');
 		this.args.canvas.width = this.args.width * this.args.cellSize + 16;
 		this.args.canvas.height = this.headerHeight + this.args.height * this.args.cellSize + 16;
 		this.ctx.fillStyle = '#BFBFBF';
 		this.ctx.fillRect(0, 0, this.args.canvas.width, this.args.canvas.height);
 
-		// draw border
+		// draw borders
 		var border = [{
 			color: '#797979', points: [
 				[0, this.args.canvas.height], [this.args.canvas.width, this.args.canvas.height],
@@ -89,16 +93,20 @@ var Minesweeper = function () {
 			this.ctx.fill();
 		}, this);
 
+		// load sprite from file
 		this.sprite = new Image();
 		this.sprite.onload = function() { return _this.start(); };
 		this.sprite.src = this.args.spritePath;
 
+		// bind events
 		this.args.canvas.addEventListener('mousedown', function (e) { return _this.cellDown(e); });
 		this.args.canvas.addEventListener('click', function (e) { return _this.cellClick(e); });
 		this.args.canvas.addEventListener('contextmenu', function (e) { return _this.setFlag(e); });
 	}
 
 	_createClass(Minesweeper, [{
+
+		// create cells and initialise game
 		key: 'start',
 		value: function start() {
 			this.startTime = null;
@@ -122,6 +130,7 @@ var Minesweeper = function () {
 			this.drawMinesCounter();
 		}
 	}, {
+		// returns true if "start over" button was pressed
 		key: 'buttonClicked',
 		value: function buttonClicked(e) {
 			var size = 1.5 * this.args.cellSize;
@@ -129,6 +138,7 @@ var Minesweeper = function () {
 					e.offsetX >= 0.5 * (this.args.canvas.width - size) && e.offsetX <= 0.5 * (this.args.canvas.width + size);
 		}
 	}, {
+		// handle event when mouse is pressed while over a cell
 		key: 'cellDown',
 		value: function cellDown(e) {
 			if (e.offsetY <= this.headerHeight + 8) {
@@ -143,8 +153,10 @@ var Minesweeper = function () {
 			this.drawCells();
 		}
 	}, {
+		// handle event when canvas is clicked
 		key: 'cellClick',
 		value: function cellClick(e) {
+			// when header is clicked
 			if (e.offsetY <= this.headerHeight + 8 || this.won !== false || this.gameover !== false) {
 				if (this.buttonClicked(e)) {
 					this.drawButton();
@@ -153,18 +165,21 @@ var Minesweeper = function () {
 				return;
 			}
 
+			// when a cell is clicked
 			var coords = this.getCoords(e);
 
 			if (this.cells[coords.x][coords.y].flagged || this.cells[coords.x][coords.y].revealed) return;
 			this.pressed.pressed = false;
 			this.drawButton(0);
 
+			// distribute mines after first click to make sure that player starts from an empty cell
 			if (this.startTime !== null)
 				this.revealCell(coords.x, coords.y);
 			else
 				this.spreadMines(coords.x, coords.y);
 		}
 	}, {
+		// set or unset flag on cell
 		key: 'setFlag',
 		value: function setFlag(e) {
 			e.preventDefault();
@@ -187,6 +202,7 @@ var Minesweeper = function () {
 			this.drawCells();
 		}
 	}, {
+		// return coordinates of clicked cell from input of mouse click position
 		key: 'getCoords',
 		value: function getCoords(e) {
 			return {
@@ -195,6 +211,7 @@ var Minesweeper = function () {
 			};
 		}
 	}, {
+		// distribute mines and set neighbour's counts
 		key: 'spreadMines',
 		value: function spreadMines(x, y) {
 			var mines = 0;
@@ -226,6 +243,7 @@ var Minesweeper = function () {
 			this.drawCells();
 		}
 	}, {
+		// draw the whole grid whenever a change was made, not on every frame
 		key: 'drawCells',
 		value: function drawCells() {
 			var contentArray = [this.sprites.mine, this.sprites.empty, this.sprites.one, this.sprites.two, this.sprites.three, this.sprites.four, this.sprites.five, this.sprites.six, this.sprites.seven, this.sprites.eight];
@@ -237,7 +255,7 @@ var Minesweeper = function () {
 
 					if (cell.flagged) {
 						sprite = this.sprites.flagged;
-					} else if (this.gameover !== false) {
+					} else if (this.gameover !== false || this.won !== false) {
 						sprite = cell.exploded ? this.sprites.mineExploded : contentArray[cell.content + 1];
 					} else if (!cell.revealed) {
 						sprite = cell.pressed ? this.sprites.pressed : this.sprites.unrevealed;
@@ -254,6 +272,7 @@ var Minesweeper = function () {
 			}
 		}
 	}, {
+		// draw and update clock
 		key: 'drawClock',
 		value: function drawClock() {
 			var time;
@@ -277,6 +296,7 @@ var Minesweeper = function () {
 			requestAnimationFrame(this.drawClock.bind(this));
 		}
 	}, {
+		// draw and update mines counter whenever a flag is set or removed
 		key: 'drawMinesCounter',
 		value: function drawMinesCounter() {
 			var minesLeft = ('000' + Math.abs(this.minesLeft).toString()).substr(-3);
@@ -294,6 +314,7 @@ var Minesweeper = function () {
 			}
 		}
 	}, {
+		// draw and update "start over" button
 		key: 'drawButton',
 		value: function drawButton() {
 			var index = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
@@ -308,6 +329,7 @@ var Minesweeper = function () {
 			);
 		}
 	}, {
+		// reveal a cell and trigger game over if needed
 		key: 'revealCell',
 		value: function revealCell(x, y) {
 			if (this.cells[x][y].reveal()) {
@@ -319,6 +341,7 @@ var Minesweeper = function () {
 			}
 		}
 	}, {
+		// simple flood fill to reveal neighboring cells if clicked cell is empty
 		key: 'floodReveal',
 		value: function floodReveal(x, y) {
 			this.cells[x][y].reveal();
@@ -340,26 +363,25 @@ var Minesweeper = function () {
 			}
 		}
 	}, {
+		// update internal counter of hidden cells and trigger win when this hits the number of mines
+		// this means that mines that don't have to be flagged and flagging is only a help for the player
 		key: 'updateCounter',
 		value: function updateCounter() {
 			this.revealedCount--;
 			if (this.revealedCount === this.args.numMines) this.win();
 		}
 	}, {
+		// reveal the rest of the board on win
 		key: 'win',
 		value: function win() {
 			this.won = Date.now();
-			for (var x = 0; x < this.args.width; x++) {
-				for (var y = 0; y < this.args.height; y++) {
-					this.cells[x][y].reveal();
-				}
-			}
 			this.minesLeft = 0;
 			this.drawMinesCounter();
 			this.drawButton(3);
 			this.drawCells();
 		}
 	}, {
+		// highlight error and reveal rest of board on game over
 		key: 'gameOver',
 		value: function gameOver() {
 			this.gameover = Date.now();
@@ -370,6 +392,9 @@ var Minesweeper = function () {
 
 	return Minesweeper;
 }();
+
+// create a simple Cell class to bundle functionality
+// would also work with a standard JS object
 
 var Cell = function () {
 	function Cell(x, y) {
