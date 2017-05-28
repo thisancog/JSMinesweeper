@@ -6,7 +6,10 @@ See a live demo [here](https://thisancog.github.io/JSMinesweeper/demo.html).
 ## Usage ##
 ```<script src="minesweeper.js" type="text/javascript"></script>
 <script>
-  var options = {…};
+  var options = {
+    width: 20,
+    height: 30
+  };
   var minesweeper = new Minesweeper(options);
 </script>
 ```
