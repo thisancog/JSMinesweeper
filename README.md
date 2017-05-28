@@ -1,7 +1,7 @@
 # JSMinesweeper
 I was bored. So I scribbled Minesweeper in JavaScript while there are already more than enough implementations. Has everything but highscores because who needs highscores.
 
-See a live demo here: https://thisancog.github.io/JSMinesweeper/demo.html
+See a live demo [here](https://thisancog.github.io/JSMinesweeper/demo.html).
 
 ## Usage ##
 ```<script src="minesweeper.js" type="text/javascript"></script>
@@ -19,3 +19,7 @@ You can pass options as a JavaScript object, if you like:
 * _cellSize_: width and height of cells in pixels (default: 30)
 * _canvas_: pass a HTML5 canvas element as reference (default: automatically creates a new element)
 * _spritePath_: path to a custom sprite. see code and example for layout.
+
+## Disclaimer ##
+
+Uses [OpenSans](https://fonts.google.com/specimen/Open+Sans).
